@@ -8,19 +8,19 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg:       #0F0A05;
-  --bg2:      #180E06;
-  --card:     #1A1208;
-  --border:   #3A2510;
+  --bg:       #0D0820;
+  --bg2:      #130A2C;
+  --card:     #1A0E38;
+  --border:   #3A1A60;
   --accent:   #E8A020;
   --accent2:  #C07810;
-  --text:     #D4C4A0;
-  --muted:    #8A7A60;
-  --green:    #2A8A50;
+  --text:     #D0C0E8;
+  --muted:    #7060A0;
+  --green:    #20A060;
   --amber:    #C07810;
-  --red:      #8A2020;
-  --cyan:     #1A8080;
-  --blue:     #1A4080;
+  --red:      #A02040;
+  --cyan:     #20A0C0;
+  --blue:     #2040A0;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 14px; min-height: 100vh; }
@@ -28,9 +28,10 @@ h1, h2, h3 { font-family: 'Space Mono', monospace; }
 a { color: var(--accent); }
 
 /* HEADER */
-.header { display: flex; align-items: center; justify-content: space-between; padding: 12px 20px; background: var(--bg2); border-bottom: 1px solid var(--border); }
+.header { display: flex; align-items: center; justify-content: space-between; padding: 12px 20px; background: #0A0618; border-bottom: 1px solid var(--border); }
 .brand { display: flex; align-items: baseline; gap: 10px; }
-.brand-name { font-family: 'Space Mono', monospace; font-size: 18px; font-weight: 700; color: var(--accent); }
+.brand-name { font-family: 'Space Mono', monospace; font-size: 18px; font-weight: 700; color: var(--accent); letter-spacing: 1px; }
+.brand-name span { color: var(--text); font-weight: 400; }
 .badge { font-family: 'Space Mono', monospace; font-size: 10px; color: var(--muted); border: 1px solid var(--border); border-radius: 3px; padding: 2px 6px; }
 .header-btns { display: flex; gap: 8px; }
 .btn { background: var(--card); border: 1px solid var(--border); color: var(--text); border-radius: 6px; padding: 7px 14px; cursor: pointer; font-size: 13px; font-family: 'DM Sans', sans-serif; transition: border-color .15s; }
@@ -92,10 +93,10 @@ a { color: var(--accent); }
 .tbl tr:last-child td { border-bottom: none; }
 .tbl tr:hover td { background: #1E1408; }
 .chip { display: inline-block; border-radius: 4px; padding: 2px 7px; font-size: 11px; font-family: 'Space Mono', monospace; font-weight: 700; }
-.chip-green { background: #0D2A18; color: #2EBD70; border: 1px solid #1A4A28; }
-.chip-amber { background: #2A1A05; color: #E8A020; border: 1px solid #4A2E0A; }
-.chip-red   { background: #2A0808; color: #D04040; border: 1px solid #4A1010; }
-.chip-blue  { background: #0A1830; color: #4090D0; border: 1px solid #1A3060; }
+.chip-green { background: #081E12; color: #30D070; border: 1px solid #1A5030; }
+.chip-amber { background: #1E1200; color: #E8A020; border: 1px solid #503010; }
+.chip-red   { background: #1E0610; color: #E03060; border: 1px solid #501030; }
+.chip-blue  { background: #060E28; color: #50A0E0; border: 1px solid #1A3870; }
 .len-input { width: 70px; background: var(--bg); border: 1px solid var(--border); border-radius: 4px; color: var(--text); padding: 4px 6px; font-size: 12px; text-align: center; font-family: 'Space Mono', monospace; }
 .len-input:focus { outline: none; border-color: var(--accent); }
 .tbl-footer td { border-top: 2px solid var(--border); background: var(--bg2); color: var(--muted); font-size: 12px; padding: 8px 10px; }
@@ -108,17 +109,17 @@ a { color: var(--accent); }
 
 /* ЩИТОК */
 .panel-title { font-family: 'Space Mono', monospace; font-size: 11px; color: var(--muted); margin-bottom: 8px; }
-.din-rail { display: flex; flex-wrap: wrap; gap: 4px; padding: 12px; background: #0A0705; border-radius: 6px; border: 1px solid var(--border); }
+.din-rail { display: flex; flex-wrap: wrap; gap: 4px; padding: 12px; background: #080514; border-radius: 6px; border: 1px solid var(--border); }
 .din-mod { border-radius: 4px; padding: 5px 6px; font-family: 'Space Mono', monospace; font-size: 9px; line-height: 1.3; text-align: center; min-width: 44px; cursor: default; }
 .din-mod .mod-type { font-size: 7px; opacity: .7; text-transform: uppercase; }
 .din-mod .mod-val { font-size: 11px; font-weight: 700; }
-.din-main  { background: #2A1800; color: #E8A020; border: 1px solid #6A4010; }
-.din-uzo   { background: #002A2A; color: #20C0C0; border: 1px solid #10606060; }
-.din-uzow  { background: #001028; color: #4090D0; border: 1px solid #104080; }
-.din-dif   { background: #081828; color: #60A0E0; border: 1px solid #1A4870; }
-.din-brk-g { background: #081A10; color: #30C068; border: 1px solid #1A4A28; }
-.din-brk-a { background: #201400; color: #D08020; border: 1px solid #504010; }
-.din-brk-r { background: #1A0808; color: #D04040; border: 1px solid #4A1010; }
+.din-main  { background: #1E1000; color: #E8A020; border: 1px solid #604010; }
+.din-uzo   { background: #001828; color: #20C0D0; border: 1px solid #105060; }
+.din-uzow  { background: #000E28; color: #4090E0; border: 1px solid #102860; }
+.din-dif   { background: #080E28; color: #60A0F0; border: 1px solid #1A3070; }
+.din-brk-g { background: #081A10; color: #30D068; border: 1px solid #1A5028; }
+.din-brk-a { background: #1E1200; color: #D08020; border: 1px solid #504010; }
+.din-brk-r { background: #180610; color: #E03060; border: 1px solid #501030; }
 .din-legend { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
 .din-legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--muted); }
 .din-legend-dot { width: 10px; height: 10px; border-radius: 2px; }
@@ -141,16 +142,22 @@ a { color: var(--accent); }
 .sum-row { display: flex; justify-content: space-between; padding: 10px 0; border-top: 1px solid var(--border); font-size: 13px; margin-top: 8px; }
 .sum-row span:last-child { font-family: 'Space Mono', monospace; color: var(--accent); font-weight: 700; }
 
+/* DATA MANAGEMENT */
+.data-mgmt { display: flex; align-items: center; justify-content: space-between; border-top: 1px solid var(--border); margin-top: 14px; padding-top: 12px; }
+.data-info { font-size: 11px; color: var(--muted); line-height: 1.6; }
+.data-info strong { color: var(--text); }
+.data-actions { display: flex; gap: 8px; }
+
 /* WARNINGS */
 .warn-block { border-radius: 6px; padding: 12px 16px; margin-bottom: 16px; font-size: 13px; line-height: 1.5; }
 .warn-block ul { margin: 6px 0 0 16px; }
 .warn-block li { margin-bottom: 3px; }
-.warn-error   { background: #1A0505; border: 1px solid #6A1010; color: #E06060; }
-.warn-error strong { color: #FF5050; font-family: 'Space Mono', monospace; }
-.warn-caution { background: #1A1000; border: 1px solid #604010; color: #C08040; }
+.warn-error   { background: #180410; border: 1px solid #601030; color: #E06080; }
+.warn-error strong { color: #FF4060; font-family: 'Space Mono', monospace; }
+.warn-caution { background: #181000; border: 1px solid #604010; color: #C08040; }
 .warn-caution strong { color: #E8A020; font-family: 'Space Mono', monospace; }
 
-.warn-info    { background: #051828; border: 1px solid #1A4060; color: #60A0C0; }
+.warn-info    { background: #060C22; border: 1px solid #1A3060; color: #60A0C0; }
 .warn-info strong { color: #40C0E0; font-family: 'Space Mono', monospace; }
 @media print {
   .no-print { display: none !important; }
@@ -175,7 +182,8 @@ a { color: var(--accent); }
 <!-- HEADER -->
 <div class="header no-print">
   <div class="brand">
-    <span class="brand-name">ElectroKit</span>
+    <span class="brand-name">Darken<span>·</span>Amber</span>
+    <span style="font-family:'Space Mono',monospace;font-size:13px;color:var(--accent)">/ ElectroKit</span>
     <span class="badge">ПУЭ · 220В</span>
   </div>
   <div class="header-btns">
@@ -193,7 +201,7 @@ a { color: var(--accent); }
       <h3>Валюта</h3>
       <div class="cfg-row cfg-cur">
         <label>Символ / код</label>
-        <input id="cfg-currency" value="AZN" oninput="saveSettings()" maxlength="5">
+        <input id="cfg-currency" value="" placeholder="₽ / $ / €" oninput="saveSettings()" maxlength="5">
       </div>
       <h3 style="margin-top:16px">Объект</h3>
       <p style="font-size:11px;color:var(--muted)">Настройки по типу объекта применяются автоматически при расчёте (Kd).</p>
@@ -225,6 +233,16 @@ a { color: var(--accent); }
       <div class="cfg-row"><label>Сборка щитка (всего)</label><input id="cfg-laborPanel" type="number" step="0.01" value="60.00" oninput="saveSettings()"></div>
       <div class="cfg-row"><label>Подкл. группы / шт</label><input id="cfg-laborGroup" type="number" step="0.01" value="8.00" oninput="saveSettings()"></div>
       <p class="settings-save">Все настройки сохраняются автоматически</p>
+    </div>
+  </div>
+
+  <!-- DATA MANAGEMENT -->
+  <div class="data-mgmt">
+    <div class="data-info" id="data-info"></div>
+    <div class="data-actions">
+      <button class="btn btn-sm" onclick="clearProject()">🗑 Очистить проект</button>
+      <button class="btn btn-sm" onclick="resetSettings()">↺ Сбросить цены</button>
+      <button class="btn btn-sm btn-danger" onclick="clearAll()">⛔ Удалить всё</button>
     </div>
   </div>
 </div>
@@ -382,7 +400,7 @@ const WET_KW = ['ван', 'санузел', 'туалет', 'кухн', 'бан�
 const UZO_STD = [16, 25, 40, 63, 80, 100];
 
 const DEFAULT_CFG = {
-  currency: 'AZN',
+  currency: '',
   cable15: 1.20, cable25: 1.80, cable40: 2.50, cable60: 3.80, cable10: 6.00,
   brk16: 5.50, brk25: 7.00, brk32: 8.00, brk40: 10.00,
   uzo: 25.00, dif: 30.00, panel: 20.00,
@@ -501,7 +519,9 @@ function readSettings() {
 
 function toggleSettings() {
   const p = document.getElementById('settings-panel');
-  p.style.display = p.style.display === 'none' ? 'block' : 'none';
+  const isOpen = p.style.display !== 'none';
+  p.style.display = isOpen ? 'none' : 'block';
+  if (!isOpen) renderDataInfo();
 }
 
 // ─── PROJECT PERSISTENCE ──────────────────────────────────────────────────────
@@ -512,9 +532,11 @@ function saveProject() {
     type:    document.getElementById('obj-type').value,
     breaker: document.getElementById('obj-breaker').value,
     note:    document.getElementById('obj-note').value,
-    rooms
+    rooms,
+    _saved:  new Date().toISOString()
   };
   localStorage.setItem('ek_proj', JSON.stringify(d));
+  renderDataInfo();
 }
 
 function loadProject() {
@@ -559,6 +581,12 @@ function deleteAppliance(roomId, appId) {
   const r = rooms.find(x => x.id === roomId);
   if (r) r.appliances = r.appliances.filter(a => a.id !== appId);
   renderRooms();
+  saveProject();
+}
+
+function onRoomDist(id, val) {
+  const r = rooms.find(x => x.id === id);
+  if (r) r.distToPanel = parseFloat(val) || 0;
   saveProject();
 }
 
@@ -636,6 +664,9 @@ function renderRooms() {
     return `<div class="room-block">
       <div class="room-header">
         <input class="room-name-input" value="${esc(r.name)}" oninput="onRoomName(${r.id},this.value)">
+        <span class="lbl-small" style="white-space:nowrap">до щитка</span>
+        <input type="number" min="0" placeholder="м" value="${r.distToPanel || ''}" style="width:60px;background:var(--bg);border:1px solid var(--border);border-radius:4px;color:var(--accent);padding:4px 6px;font-size:12px;font-family:'Space Mono',monospace;text-align:center" oninput="onRoomDist(${r.id},this.value)">
+        <span class="lbl-small">м</span>
         <button class="btn btn-sm" onclick="addAppliance(${r.id})">+ прибор</button>
         <button class="btn btn-sm btn-danger" onclick="deleteRoom(${r.id})">✕</button>
       </div>
@@ -654,13 +685,14 @@ function buildGroups(objType) {
 
   for (const room of rooms) {
     const wet = isWetRoom(room.name);
+    const dist = room.distToPanel || 0;
 
     // Lighting group
     const lightApps = room.appliances.filter(a => a.type === 'lighting');
     if (lightApps.length) {
       const w = lightApps.reduce((s, a) => s + a.count * SPECS.lighting.wPerUnit, 0);
       const { section, breaker } = cableForLoad(w, 'lighting');
-      result.push({ num: ++num, label: `${room.name} — Освещение`, room: room.name, watts: w, section, breaker, wet: false, lineType: 'lighting' });
+      result.push({ num: ++num, label: `${room.name} — Освещение`, room: room.name, watts: w, section, breaker, wet: false, lineType: 'lighting', dist });
     }
 
     // Socket group (all socket-grp items combined)
@@ -669,7 +701,7 @@ function buildGroups(objType) {
       const w = socketApps.reduce((s, a) => s + a.count * SPECS[a.type].wPerUnit, 0);
       const socketCount = socketApps.filter(a => a.type === 'socket').reduce((s, a) => s + a.count, 0);
       const { section, breaker } = cableForLoad(w, 'socket');
-      result.push({ num: ++num, label: `${room.name} — Розетки и приборы`, room: room.name, watts: w, section, breaker, wet, lineType: 'socket', socketCount });
+      result.push({ num: ++num, label: `${room.name} — Розетки и приборы`, room: room.name, watts: w, section, breaker, wet, lineType: 'socket', socketCount, dist });
     }
 
     // Dedicated: one group per appliance type
@@ -679,7 +711,7 @@ function buildGroups(objType) {
       if (!apps.length) continue;
       const w = apps.reduce((s, a) => s + a.count * SPECS[t].wPerUnit, 0);
       const { section, breaker } = cableForLoad(w, 'dedicated');
-      result.push({ num: ++num, label: `${room.name} — ${SPECS[t].label}`, room: room.name, watts: w, section, breaker, wet, lineType: 'dedicated' });
+      result.push({ num: ++num, label: `${room.name} — ${SPECS[t].label}`, room: room.name, watts: w, section, breaker, wet, lineType: 'dedicated', dist });
     }
 
     // AC: one group per unit (always dry)
@@ -689,7 +721,7 @@ function buildGroups(objType) {
         const w = SPECS.ac.wPerUnit;
         const { section, breaker } = cableForLoad(w, 'ac');
         const idx = a.count > 1 ? ` #${i + 1}` : '';
-        result.push({ num: ++num, label: `${room.name} — Кондиционер${idx}`, room: room.name, watts: w, section, breaker, wet: false, lineType: 'ac' });
+        result.push({ num: ++num, label: `${room.name} — Кондиционер${idx}`, room: room.name, watts: w, section, breaker, wet: false, lineType: 'ac', dist });
       }
     }
 
@@ -716,12 +748,34 @@ function calculate() {
 
   groups = buildGroups(objType);
   lineLens = {};
+  // Pre-fill line lengths from room distances
+  for (const g of groups) {
+    if (g.dist > 0) lineLens[g.num] = g.dist;
+  }
 
   const totalRaw = groups.reduce((s, g) => s + g.watts, 0);
   const totalKd  = totalRaw * kd;
   const totalA   = totalKd / 220;
 
   renderGroups(totalRaw, totalKd, totalA);
+
+  // Show ΔU for pre-filled distances
+  for (const g of groups) {
+    if (lineLens[g.num] > 0) {
+      const vdEl = document.getElementById('vd-' + g.num);
+      if (vdEl) {
+        const dU = voltDrop(g.watts, lineLens[g.num], g.section);
+        if (dU > 5) {
+          vdEl.innerHTML = `<span style="color:#E03060">ΔU=${dU.toFixed(1)}% ⚠ → ${upsizeSection(g.section)}мм²</span>`;
+        } else if (dU > 4) {
+          vdEl.innerHTML = `<span style="color:#E8A020">ΔU=${dU.toFixed(1)}%</span>`;
+        } else if (dU > 0) {
+          vdEl.innerHTML = `<span style="color:#30D068">ΔU=${dU.toFixed(1)}%</span>`;
+        }
+      }
+    }
+  }
+
   renderPanel();
   checkWarnings(mainBreaker, totalKd, totalA);
   renderCost();
@@ -827,13 +881,6 @@ function checkWarnings(mainBreaker, totalKd, totalA) {
       Используйте щиток на 24 места.`);
   }
 
-  // 8. No wet zones — suggest adding general UZO for all groups anyway
-  const hasWetZone = groups.some(g => g.wet);
-  if (!hasWetZone && groups.length > 0) {
-    tips.push(`Мокрые зоны не обнаружены. Для дополнительной защиты рекомендуется
-      установить общее УЗО 30 мА после вводного автомата на все группы.`);
-  }
-
   if (tips.length) {
     const list = tips.map(t => `<li style="margin-bottom:6px">${t}</li>`).join('');
     blocks.push(`<div class="warn-block warn-info">
@@ -864,7 +911,7 @@ function renderGroups(totalRaw, totalKd, totalA) {
       <td>${bChip}</td>
       <td>${protChip}</td>
       <td class="no-print">
-        <input class="len-input" type="number" min="0" placeholder="—" data-group="${g.num}" oninput="updateLen(this)">
+        <input class="len-input" type="number" min="0" placeholder="—" value="${lineLens[g.num] || ''}" data-group="${g.num}" oninput="updateLen(this)">
         <div id="vd-${g.num}" style="font-size:10px;margin-top:2px;font-family:'Space Mono',monospace"></div>
       </td>
     </tr>`;
@@ -997,7 +1044,7 @@ function renderPanel() {
 
 function renderCost() {
   const cfg = readSettings();
-  const cur = cfg.currency || 'AZN';
+  const cur = cfg.currency || '';
 
   // Cable totals
   const cableM = {};
@@ -1173,6 +1220,77 @@ function renderCost() {
     : '';
 
   renderCableSum();
+}
+
+// ─── DATA MANAGEMENT ─────────────────────────────────────────────────────────
+
+function renderDataInfo() {
+  const el = document.getElementById('data-info');
+  if (!el) return;
+
+  const proj = localStorage.getItem('ek_proj') || '';
+  const cfg  = localStorage.getItem('ek_cfg')  || '';
+  const projKB = (proj.length / 1024).toFixed(1);
+  const cfgKB  = (cfg.length  / 1024).toFixed(1);
+  const totalKB = ((proj.length + cfg.length) / 1024).toFixed(1);
+
+  const projDate = proj ? (() => {
+    try { const d = JSON.parse(proj); return d._saved ? new Date(d._saved).toLocaleDateString('ru-RU') : '—'; } catch { return '—'; }
+  })() : '—';
+
+  el.innerHTML = `
+    <strong>Проект:</strong> ${proj ? projKB + ' КБ' : 'не сохранён'} &nbsp;·&nbsp;
+    <strong>Настройки:</strong> ${cfg ? cfgKB + ' КБ' : 'по умолчанию'} &nbsp;·&nbsp;
+    <strong>Итого:</strong> ${totalKB} КБ &nbsp;·&nbsp;
+    <strong>Лимит:</strong> ~5 МБ &nbsp;·&nbsp;
+    <strong>Последнее сохранение:</strong> ${projDate}
+  `;
+}
+
+function clearProject() {
+  if (!confirm('Удалить текущий проект? Настройки цен останутся.')) return;
+  localStorage.removeItem('ek_proj');
+  rooms = [];
+  renderRooms();
+  document.getElementById('obj-name').value    = '';
+  document.getElementById('obj-type').value    = 'apartment';
+  document.getElementById('obj-breaker').value = '32';
+  document.getElementById('obj-note').value    = '';
+  document.getElementById('results').style.display = 'none';
+  document.getElementById('btn-pdf').style.display = 'none';
+  groups = []; lineLens = {};
+  renderDataInfo();
+}
+
+function resetSettings() {
+  if (!confirm('Сбросить все цены и настройки к значениям по умолчанию?')) return;
+  localStorage.removeItem('ek_cfg');
+  for (const key of Object.keys(DEFAULT_CFG)) {
+    const el = document.getElementById('cfg-' + key);
+    if (el) el.value = DEFAULT_CFG[key];
+  }
+  if (groups.length > 0) renderCost();
+  renderDataInfo();
+}
+
+function clearAll() {
+  if (!confirm('Удалить ВСЕ данные — проект и настройки? Это действие необратимо.')) return;
+  localStorage.removeItem('ek_proj');
+  localStorage.removeItem('ek_cfg');
+  rooms = [];
+  renderRooms();
+  document.getElementById('obj-name').value    = '';
+  document.getElementById('obj-type').value    = 'apartment';
+  document.getElementById('obj-breaker').value = '32';
+  document.getElementById('obj-note').value    = '';
+  document.getElementById('results').style.display = 'none';
+  document.getElementById('btn-pdf').style.display = 'none';
+  groups = []; lineLens = {};
+  for (const key of Object.keys(DEFAULT_CFG)) {
+    const el = document.getElementById('cfg-' + key);
+    if (el) el.value = DEFAULT_CFG[key];
+  }
+  renderDataInfo();
 }
 
 // ─── EXPORT / IMPORT ─────────────────────────────────────────────────────────
