@@ -344,7 +344,17 @@ a { color: var(--accent); }
 
   <!-- GROUPS -->
     <div class="card">
-      <div class="section-title">Группы нагрузки</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px">
+        <div class="section-title" style="margin-bottom:0">Группы нагрузки</div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:11px;color:var(--muted)">Режим:</span>
+          <div style="display:flex;background:var(--bg);border:1px solid var(--border);border-radius:6px;overflow:hidden">
+            <button id="mode-auto" onclick="setMode('auto')" style="padding:5px 14px;font-size:12px;font-family:'Space Mono',monospace;border:none;cursor:pointer;background:var(--accent);color:#000;font-weight:700">АВТО</button>
+            <button id="mode-manual" onclick="setMode('manual')" style="padding:5px 14px;font-size:12px;font-family:'Space Mono',monospace;border:none;cursor:pointer;background:transparent;color:var(--muted)">МАНУАЛ</button>
+          </div>
+          <span id="mode-hint" style="font-size:11px;color:var(--muted)">Кабель и автомат - по ПУЭ</span>
+        </div>
+      </div>
       <table class="tbl" id="groups-tbl">
         <thead>
           <tr>
@@ -428,7 +438,8 @@ const SPECS = {
   lighting:    { label: 'Освещение (точки)',      wPerUnit: 60,   grp: 'lighting'  },
   washing:     { label: 'Стиральная машина',      wPerUnit: 2000, grp: 'dedicated' },
   dishwasher:  { label: 'Посудомоечная машина',  wPerUnit: 2000, grp: 'dedicated' },
-  oven:        { label: 'Духовой шкаф',           wPerUnit: 2500, grp: 'dedicated' },
+  oven:        { label: 'Духовой шкаф (выделенная линия)', wPerUnit: 2500, grp: 'dedicated' },
+  ovenSocket:  { label: 'Духовой шкаф (вилка → розетка)',  wPerUnit: 2500, grp: 'socket'    },
   cooktop:     { label: 'Варочная панель',         wPerUnit: 5000, grp: 'dedicated' },
   cooktopOven: { label: 'Варочная + духовка',      wPerUnit: 7000, grp: 'dedicated' },
   waterHeater: { label: 'Водонагреватель',        wPerUnit: 2000, grp: 'dedicated' },
@@ -485,6 +496,7 @@ const DEFAULT_CFG = {
 let rooms = [];      // [{id, name, appliances:[{id,type,count,customName,customW}]}]
 let groups = [];     // [{num, label, room, watts, section, breaker, wet}]
 let lineLens = {};   // groupNum → meters
+let manualOverrides = {}; // groupNum → {section, breaker} — мануальный режим
 
 let _roomId = 0, _appId = 0;
 function rid() { return ++_roomId; }
@@ -533,7 +545,9 @@ function cableForLoad(watts, lineType, voltage, minSectionOverride) {
   const minIdx = CABLE_TABLE.findIndex(r => parseFloat(r.sec) >= minSec - 1e-9);
 
   // 1. Автомат - наименьший стандартный номинал, пропускающий рабочий ток (≥ breakerI)
+  //    Минимум C16 для выделенных линий (стиралка, бойлер и тд) - практический минимум
   let breaker = STD_BREAKERS.find(b => b >= breakerI) || STD_BREAKERS[STD_BREAKERS.length - 1];
+  if (lineType === 'dedicated' && breaker < 16) breaker = 16;
 
   // 2. Кабель - наименьшее сечение (не ниже минимума), которое одновременно:
   //    а) выдерживает ток с запасом 1.25 (доп. ток ≥ cableI) - тепловой критерий;
@@ -577,7 +591,7 @@ function uzoRating(mainA) {
 // Ближайший стандартный ≥ расчётного тока, но не ниже самого большого
 // автомата за УЗО. 40А зачастую доступнее и дешевле 25А - учитывайте при закупке.
 function uzoForCurrent(sumA, minFloorA) {
-  const need = Math.max(sumA || 0, minFloorA || 0);
+  const need = Math.max(sumA || 0, minFloorA || 0, 16); // минимум 16А для УЗО
   return UZO_STD.find(r => r >= need) || 100;
 }
 
@@ -887,6 +901,8 @@ function calculate() {
 
   groups = buildGroups(objType);
   lineLens = {};
+  manualOverrides = {};
+  if (editMode === 'manual') setMode('auto'); // сброс в авто при новом расчёте
   // Pre-fill line lengths from room distances
   for (const g of groups) {
     if (g.dist > 0) lineLens[g.num] = g.dist;
@@ -1055,15 +1071,78 @@ function checkWarnings(mainBreaker, totalKd, totalA) {
   box.innerHTML = blocks.join('');
 }
 
+// ─── AUTO / MANUAL MODE ──────────────────────────────────────────────────────
+
+let editMode = 'auto'; // 'auto' | 'manual'
+
+function setMode(m) {
+  editMode = m;
+  const btnAuto   = document.getElementById('mode-auto');
+  const btnManual = document.getElementById('mode-manual');
+  const hint      = document.getElementById('mode-hint');
+  if (m === 'auto') {
+    btnAuto.style.background   = 'var(--accent)'; btnAuto.style.color = '#000'; btnAuto.style.fontWeight = '700';
+    btnManual.style.background = 'transparent';   btnManual.style.color = 'var(--muted)'; btnManual.style.fontWeight = 'normal';
+    hint.textContent = 'Кабель и автомат - по ПУЭ';
+    hint.style.color = 'var(--muted)';
+    manualOverrides = {};
+  } else {
+    btnManual.style.background = 'var(--accent)'; btnManual.style.color = '#000'; btnManual.style.fontWeight = '700';
+    btnAuto.style.background   = 'transparent';   btnAuto.style.color = 'var(--muted)'; btnAuto.style.fontWeight = 'normal';
+    hint.textContent = '✏ Мануальный режим - редактируйте кабель и автомат напрямую. Смета обновляется автоматически. Нарушения ПУЭ подсвечиваются красным.';
+    hint.style.color = 'var(--accent)';
+  }
+  if (groups.length > 0) renderGroups(_lastTotalRaw, _lastTotalKd, _lastTotalA);
+}
+
+function onManualSection(num, val) {
+  if (!manualOverrides[num]) manualOverrides[num] = {};
+  manualOverrides[num].section = val;
+  _validateManualRow(num);
+  renderCost();
+}
+
+function onManualBreaker(num, val) {
+  if (!manualOverrides[num]) manualOverrides[num] = {};
+  manualOverrides[num].breaker = parseInt(val) || 0;
+  _validateManualRow(num);
+  renderCost();
+}
+
+function _validateManualRow(num) {
+  const g   = groups.find(x => x.num === num);
+  const ov  = manualOverrides[num] || {};
+  const sec = ov.section || g.section;
+  const brk = ov.breaker || g.breaker;
+  const row = CABLE_TABLE.find(r => r.sec === sec);
+  const warn = document.getElementById('manual-warn-' + num);
+  if (!warn) return;
+  const issues = [];
+  if (row && brk > row.maxBrk) issues.push(`Автомат C${brk} превышает допустимый для ${sec}мм² (макс C${row.maxBrk})`);
+  if (row && g.allowedA && brk > g.allowedA) issues.push(`Автомат C${brk} > допустимый ток кабеля ${g.allowedA}А`);
+  warn.innerHTML = issues.length
+    ? `<span style="color:#E03060;font-size:10px">⚠ ${issues.join('; ')}</span>`
+    : `<span style="color:#20A060;font-size:10px">✓ ПУЭ</span>`;
+}
+
+// Cache last totals for re-render on mode switch
+let _lastTotalRaw = 0, _lastTotalKd = 0, _lastTotalA = 0;
+
 // ─── RENDER GROUPS ───────────────────────────────────────────────────────────
 
 function renderGroups(totalRaw, totalKd, totalA) {
+  _lastTotalRaw = totalRaw; _lastTotalKd = totalKd; _lastTotalA = totalA;
   const body = document.getElementById('groups-body');
   const foot = document.getElementById('groups-foot');
 
   const scheme = (readSettings().wetScheme === 'B') ? 'B' : 'A';
+  const SECTIONS = ['1.5', '2.5', '4.0', '6.0', '10'];
+
   body.innerHTML = groups.map(g => {
-    const bChip = breakerChip(g.breaker, g.brkClass);
+    const ov  = manualOverrides[g.num] || {};
+    const sec = ov.section || g.section;
+    const brk = ov.breaker || g.breaker;
+
     let protChip;
     if (g.wet) {
       const mA = g.uzomA || 30;
@@ -1073,15 +1152,31 @@ function renderGroups(totalRaw, totalKd, totalA) {
     } else {
       protChip = `<span class="chip" style="background:#1A1208;color:var(--muted);border:1px solid var(--border)">Автомат</span>`;
     }
+
+    // Cable cell
+    const cableCell = editMode === 'manual'
+      ? `<select onchange="onManualSection(${g.num},this.value)" style="background:var(--bg);border:1px solid var(--accent);border-radius:4px;color:var(--text);padding:4px 6px;font-size:12px;font-family:'Space Mono',monospace;width:100%">
+          ${SECTIONS.map(s => `<option value="${s}" ${s===sec?'selected':''}>${s} мм²</option>`).join('')}
+        </select>`
+      : `<div title="Допустимый ток ${g.allowedA || cableAllowedA(g.section)} А - ПУЭ табл.1.3.4, одиночная прокладка, +25°C.">
+          ВВГнг 3×${g.section} мм²
+          <div style="font-size:10px;color:var(--muted);font-family:'Space Mono',monospace">доп. ${g.allowedA || cableAllowedA(g.section)} А</div>
+        </div>`;
+
+    // Breaker cell
+    const brkCell = editMode === 'manual'
+      ? `<select onchange="onManualBreaker(${g.num},this.value)" style="background:var(--bg);border:1px solid var(--accent);border-radius:4px;color:var(--text);padding:4px 6px;font-size:12px;font-family:'Space Mono',monospace;width:80px">
+          ${[10,16,25,32,40,50,63].map(b => `<option value="${b}" ${b===brk?'selected':''}>${g.brkClass||'C'}${b}А</option>`).join('')}
+        </select>
+        <div id="manual-warn-${g.num}" style="margin-top:3px"></div>`
+      : breakerChip(g.breaker, g.brkClass);
+
     return `<tr>
       <td style="color:var(--muted);font-family:'Space Mono',monospace">${g.num}</td>
       <td>${esc(g.label)}</td>
       <td style="font-family:'Space Mono',monospace">${g.watts} Вт</td>
-      <td title="Допустимый ток ${g.allowedA || cableAllowedA(g.section)} А - ПУЭ табл.1.3.4, одиночная прокладка, +25°C. При групповой прокладке или в трубе применяйте понижающий коэффициент.">
-        ВВГнг 3×${g.section} мм²
-        <div style="font-size:10px;color:var(--muted);font-family:'Space Mono',monospace">доп. ${g.allowedA || cableAllowedA(g.section)} А</div>
-      </td>
-      <td>${bChip}</td>
+      <td>${cableCell}</td>
+      <td>${brkCell}</td>
       <td>${protChip}</td>
       <td class="no-print">
         <input class="len-input" type="number" min="0" placeholder="-" value="${lineLens[g.num] || ''}" data-group="${g.num}" oninput="updateLen(this)">
@@ -1089,6 +1184,11 @@ function renderGroups(totalRaw, totalKd, totalA) {
       </td>
     </tr>`;
   }).join('');
+
+  // Validate existing manual overrides after re-render
+  if (editMode === 'manual') {
+    for (const num of Object.keys(manualOverrides)) _validateManualRow(+num);
+  }
 
   const objType = document.getElementById('obj-type').value;
   const kd = KD[objType];
