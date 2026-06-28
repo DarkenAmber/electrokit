@@ -746,7 +746,7 @@ function deleteRoom(id) {
 
 function addAppliance(roomId) {
   const r = rooms.find(x => x.id === roomId);
-  if (r) { r.appliances.push({ id: aid(), type: 'socket', count: 1, customName: '', customW: 1000 }); }
+  if (r) { r.appliances.push({ id: aid(), type: 'socket', count: 1, customName: '', customW: SPECS.socket.wPerUnit }); }
   renderRooms();
   saveProject();
 }
@@ -774,8 +774,33 @@ function onAppType(roomId, appId, val) {
   const r = rooms.find(x => x.id === roomId);
   if (!r) return;
   const a = r.appliances.find(x => x.id === appId);
-  if (a) { a.type = val; }
+  if (a) {
+    a.type = val;
+    // Сбрасываем мощность на типовое значение нового типа
+    a.customW = SPECS[val] ? SPECS[val].wPerUnit : (a.customW || 0);
+  }
   renderRooms();
+  saveProject();
+}
+
+function onAppW(roomId, appId, val) {
+  const r = rooms.find(x => x.id === roomId);
+  if (!r) return;
+  const a = r.appliances.find(x => x.id === appId);
+  if (!a) return;
+  a.customW = Math.max(1, parseInt(val) || 1);
+  // Показываем предупреждение если мощность высокая для розеточной группы
+  const el = document.getElementById(`ww-${roomId}-${appId}`);
+  if (el) {
+    const grp = SPECS[a.type] ? SPECS[a.type].grp : '';
+    if (a.customW > 3500 && grp === 'socket') {
+      el.textContent = '⚠ рекомендуется выделенная линия';
+    } else if (a.customW > 5000) {
+      el.textContent = '⚠ очень высокая мощность';
+    } else {
+      el.textContent = '';
+    }
+  }
   saveProject();
 }
 
@@ -817,20 +842,26 @@ function renderRooms() {
   list.innerHTML = rooms.map(r => {
     const appRows = r.appliances.map(a => {
       const isCustom = a.type === 'custom';
-      const customFields = isCustom
-        ? `<input type="text" placeholder="Название" value="${esc(a.customName)}" style="width:120px" oninput="onAppCustomName(${r.id},${a.id},this.value)">
-           <input type="number" min="1" placeholder="Вт" value="${esc(a.customW)}" oninput="onAppCustomW(${r.id},${a.id},this.value)">`
-        : `<span class="lbl-small">${SPECS[a.type] ? Math.round(SPECS[a.type].wPerUnit * a.count) + ' Вт' : ''}</span>`;
+      const specW = SPECS[a.type] ? SPECS[a.type].wPerUnit : 0;
+      // customW используется для всех типов — по умолчанию типовое значение из SPECS
+      const currentW = a.customW != null ? a.customW : specW;
 
       const selectedOptions = Object.entries(SPECS).map(([k, v]) =>
         `<option value="${k}" ${a.type === k ? 'selected' : ''}>${esc(v.label)}</option>`
       ).join('');
 
+      const customNameField = isCustom
+        ? `<input type="text" placeholder="Название" value="${esc(a.customName)}" style="width:110px" oninput="onAppCustomName(${r.id},${a.id},this.value)">`
+        : '';
+
       return `<div class="appliance-row">
         <select onchange="onAppType(${r.id},${a.id},this.value)">${selectedOptions}</select>
         <span class="lbl-small">×</span>
-        <input type="number" min="1" value="${a.count}" oninput="onAppCount(${r.id},${a.id},this.value)">
-        ${customFields}
+        <input type="number" min="1" value="${a.count}" style="width:60px" oninput="onAppCount(${r.id},${a.id},this.value)">
+        ${customNameField}
+        <input type="number" min="1" value="${currentW}" style="width:75px" title="Мощность Вт (типовое: ${specW} Вт)" oninput="onAppW(${r.id},${a.id},this.value)">
+        <span class="lbl-small">Вт</span>
+        <span id="ww-${r.id}-${a.id}" style="font-size:11px;color:#E8A020">${currentW > 3500 && SPECS[a.type] && SPECS[a.type].grp === 'socket' ? '⚠ рекомендуется выделенная линия' : ''}</span>
         <button class="btn btn-sm btn-danger" onclick="deleteAppliance(${r.id},${a.id})">✕</button>
       </div>`;
     }).join('');
@@ -867,7 +898,7 @@ function buildGroups(objType) {
     // Lighting group - class B
     const lightApps = room.appliances.filter(a => a.type === 'lighting');
     if (lightApps.length) {
-      const w = lightApps.reduce((s, a) => s + a.count * SPECS.lighting.wPerUnit, 0);
+      const w = lightApps.reduce((s, a) => s + a.count * (a.customW != null ? a.customW : SPECS.lighting.wPerUnit), 0);
       const { section, breaker, brkClass, allowedA } = cableForLoad(w, 'lighting', voltage);
       result.push({ num: ++num, label: `${room.name} - Освещение`, room: room.name, watts: w, section, breaker, brkClass, allowedA, wet: false, uzomA: 0, lineType: 'lighting', dist });
     }
@@ -875,7 +906,7 @@ function buildGroups(objType) {
     // Socket group - class C, min 2.5мм²
     const socketApps = room.appliances.filter(a => SPECS[a.type] && SPECS[a.type].grp === 'socket');
     if (socketApps.length) {
-      const w = socketApps.reduce((s, a) => s + a.count * SPECS[a.type].wPerUnit, 0);
+      const w = socketApps.reduce((s, a) => s + a.count * (a.customW != null ? a.customW : SPECS[a.type].wPerUnit), 0);
       const socketCount = socketApps.filter(a => a.type === 'socket').reduce((s, a) => s + a.count, 0);
       const { section, breaker, brkClass, allowedA } = cableForLoad(w, 'socket', voltage);
       result.push({ num: ++num, label: `${room.name} - Розетки и приборы`, room: room.name, watts: w, section, breaker, brkClass, allowedA, wet, uzomA, lineType: 'socket', socketCount, dist });
@@ -886,17 +917,16 @@ function buildGroups(objType) {
     for (const t of dedTypes) {
       const apps = room.appliances.filter(a => a.type === t);
       if (!apps.length) continue;
-      const w = apps.reduce((s, a) => s + a.count * SPECS[t].wPerUnit, 0);
+      const w = apps.reduce((s, a) => s + a.count * (a.customW != null ? a.customW : SPECS[t].wPerUnit), 0);
       const { section, breaker, brkClass, allowedA } = cableForLoad(w, 'dedicated', voltage, MIN_SECTION[t]);
       result.push({ num: ++num, label: `${room.name} - ${SPECS[t].label}`, room: room.name, watts: w, section, breaker, brkClass, allowedA, wet, uzomA, lineType: 'dedicated', dist });
     }
 
     // AC - class C, min 2.5мм², коэф. 1.25
-    // Больше не исключение для мокрых зон: в МКД УЗО/диф обязателен на всех розеточных группах
     const acApps = room.appliances.filter(a => a.type === 'ac');
     for (const a of acApps) {
       for (let i = 0; i < a.count; i++) {
-        const w = SPECS.ac.wPerUnit;
+        const w = a.customW != null ? a.customW : SPECS.ac.wPerUnit;
         const { section, breaker, brkClass, allowedA } = cableForLoad(w, 'ac', voltage);
         const idx = a.count > 1 ? ` #${i + 1}` : '';
         result.push({ num: ++num, label: `${room.name} - Кондиционер${idx}`, room: room.name, watts: w, section, breaker, brkClass, allowedA, wet, uzomA, lineType: 'ac', dist });
@@ -1795,24 +1825,24 @@ document.addEventListener('DOMContentLoaded', () => {
   if (!rooms.length) {
     // Add a default room to get started
     rooms.push({ id: rid(), name: 'Гостиная', appliances: [
-      { id: aid(), type: 'lighting', count: 6, customName: '', customW: 0 },
-      { id: aid(), type: 'socket',   count: 4, customName: '', customW: 0 }
+      { id: aid(), type: 'lighting', count: 6, customName: '', customW: null },
+      { id: aid(), type: 'socket',   count: 4, customName: '', customW: null }
     ]});
     rooms.push({ id: rid(), name: 'Кухня', appliances: [
-      { id: aid(), type: 'lighting', count: 4, customName: '', customW: 0 },
-      { id: aid(), type: 'socket',   count: 3, customName: '', customW: 0 },
-      { id: aid(), type: 'kettle',   count: 1, customName: '', customW: 0 },
-      { id: aid(), type: 'oven',     count: 1, customName: '', customW: 0 }
+      { id: aid(), type: 'lighting', count: 4, customName: '', customW: null },
+      { id: aid(), type: 'socket',   count: 3, customName: '', customW: null },
+      { id: aid(), type: 'kettle',   count: 1, customName: '', customW: null },
+      { id: aid(), type: 'oven',     count: 1, customName: '', customW: null }
     ]});
     rooms.push({ id: rid(), name: 'Ванная', appliances: [
-      { id: aid(), type: 'lighting',      count: 2, customName: '', customW: 0 },
-      { id: aid(), type: 'bathroomSocket',count: 1, customName: '', customW: 0 },
-      { id: aid(), type: 'washing',       count: 1, customName: '', customW: 0 },
-      { id: aid(), type: 'waterHeater',   count: 1, customName: '', customW: 0 }
+      { id: aid(), type: 'lighting',      count: 2, customName: '', customW: null },
+      { id: aid(), type: 'bathroomSocket',count: 1, customName: '', customW: null },
+      { id: aid(), type: 'washing',       count: 1, customName: '', customW: null },
+      { id: aid(), type: 'waterHeater',   count: 1, customName: '', customW: null }
     ]});
     rooms.push({ id: rid(), name: 'Коридор', appliances: [
-      { id: aid(), type: 'lighting', count: 2, customName: '', customW: 0 },
-      { id: aid(), type: 'socket',   count: 1, customName: '', customW: 0 }
+      { id: aid(), type: 'lighting', count: 2, customName: '', customW: null },
+      { id: aid(), type: 'socket',   count: 1, customName: '', customW: null }
     ]});
     renderRooms();
   }
